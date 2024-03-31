@@ -7,34 +7,33 @@ using UnityEngine.U2D;
 
 public class Zz : MonoBehaviour
 {
-    [SerializeField] GameObject attackHitBox;
     [SerializeField] private int hp = 100;
     [SerializeField] private int stamina = 100;
-    Animator animator;
-    public Image HPBar;
-    public Image StaminaBar;
-    public string groundTag = "Ground";
-    public string playerTag = "Player2";
-    public string HPTag = "HP";
-    public bool checkGround = true;
-    private bool canJump = true;
-    public KeyCode Jkey = KeyCode.I;
-    public KeyCode Pkey = KeyCode.RightShift;
-    public KeyCode left = KeyCode.J;
-    public KeyCode right = KeyCode.L;
-    public KeyCode Attack = KeyCode.O;
-    bool isAttacking = false;
-    private Rigidbody2D rb;
-    SpriteRenderer sprite;
     public float speed = 5f; 
     public float jump = 5f;
     public float horizontalDamping = 2f;
     public float push = 5f;
     private float increaseRate = 1f;
-    public Transform player1; // Трансформ игрока 1
-    public Transform player2; // Трансформ игрока 2
+    public KeyCode Jkey = KeyCode.W;
+    public KeyCode Pkey = KeyCode.LeftShift;
+    public KeyCode left = KeyCode.A;
+    public KeyCode right = KeyCode.D;
+    public KeyCode Attack = KeyCode.E;
+    public KeyCode protectionKey = KeyCode.LeftControl;
+    [SerializeField] GameObject attackHitBox;
     [SerializeField] private bool isInvincible = false; 
-    public KeyCode protectionKey = KeyCode.RightControl;
+    Animator animator;
+    private Rigidbody2D rb;
+    SpriteRenderer sprite;
+    public Image HPBar;
+    public Image StaminaBar;
+    public string groundTag = "Ground";
+    public string playerTag = "Player2";
+    public bool checkGround = true;
+    private bool canJump = true;
+    bool isAttacking = false;
+    public Transform player1; 
+    public Transform player2; 
 
     private void Awake()
     {
@@ -44,10 +43,11 @@ public class Zz : MonoBehaviour
 
     private void Update()
     {
-    if (Input.GetKeyDown(protectionKey )  &&!isInvincible && !isAttacking )
+    if (Input.GetKeyDown(protectionKey )  &&!isInvincible && !isAttacking  && stamina >= 10)
             {
                 StartCoroutine(EnableInvincibilityForOneSecond());
-                
+                stamina -= 10;
+                StaminaBar.fillAmount = stamina*0.01f;
             }
 
     if (canJump)
@@ -64,8 +64,7 @@ public class Zz : MonoBehaviour
         }
         else
         {
-            // Постепенное уменьшение скорости после отжатия кнопки
-            float deceleration = 5f; // Коэффициент уменьшения скорости
+            float deceleration = 5f; 
             rb.velocity = new Vector2(Mathf.Lerp(rb.velocity.x, 0, Time.deltaTime * deceleration), rb.velocity.y);
             
         }
@@ -73,14 +72,10 @@ public class Zz : MonoBehaviour
 
     if (canJump && Input.GetKeyDown(Jkey) && stamina >= 10)
     {
-        // Применить силу прыжка
         rb.AddForce(Vector2.up * jump, ForceMode2D.Impulse);
         canJump =!checkGround;
         stamina -= 10;
         StaminaBar.fillAmount = stamina*0.01f;
-       
-
-        // Применить затухание горизонтальной скорости
         rb.velocity = new Vector2(rb.velocity.x * horizontalDamping, rb.velocity.y);
     }
 
@@ -175,9 +170,9 @@ private void Start()
 
     private void OnTriggerEnter2D(Collider2D other)
     {
-        if (other.gameObject.CompareTag("attackHitBox"))
+        if (other.gameObject.CompareTag("attackHitBox") && !isInvincible)
         {
-            TakeDamage(3); 
+            TakeDamage(5); 
         }
     }
 
